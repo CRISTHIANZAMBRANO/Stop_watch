@@ -1,64 +1,104 @@
 package co.edu.unipiloto.stopwatch;
 
-import android.os.Handler;
-import android.view.View;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import java.util.Locale;
 
 public class StopwatchActivity extends Activity {
-    private int seconds=0;
+    private int seconds = 0;
     private boolean running;
+    private int vuelta = 0;
+    String time ="";
+    String aux = "";
 
+    private String timeVueltaVal [] = new String[5];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
-        if(savedInstanceState !=null){
-            seconds=savedInstanceState.getInt("seconds");
-            running=savedInstanceState.getBoolean("running");
+
+        if(savedInstanceState!=null){
+            seconds = savedInstanceState.getInt("seconds");
+            running = savedInstanceState.getBoolean("running");
         }
         runTimer();
-
     }
-    public void onClickStart(View view){
-        running=true;
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt("seconds",seconds);
+        outState.putBoolean("running",running);
     }
-    public void onClickStop(View view){
-        running=false;
 
+    public void onCLickStart(View view) {
+        running = true;
     }
-    public void onClickReset(View view){
-        running=false;
-        seconds=0;
 
+    public void onCLickStop(View view) {
+        running = false;
     }
-    private void runTimer() {
-        final TextView timeView = (TextView) findViewById(R.id.time_view);
+
+    public void onCLickReset(View view) {
+        running = false;
+        seconds = 0;
+        vuelta = 0;
+        timeVueltaVal = new String[5];
+        time = "";
+    }
+
+    private void runTimer(){
+        final TextView timeView= findViewById(R.id.time_view);
+
         final Handler handler = new Handler();
         handler.post(new Runnable() {
             @Override
             public void run() {
+                int hours = seconds/3600;
+                int minutes = (seconds%3600)/60;
+                int secs = seconds%60;
 
-
-                int hours = seconds / 3600;
-                int minutes = (seconds % 3600) / 60;
-                int secs = seconds % 60;
-                String time = String.format(Locale.getDefault(), "%d:%02d:%02d,hours,minutes,secs");
+                time = String.format(Locale.getDefault(),"%d:%02d:%02d",hours,minutes,secs);
                 timeView.setText(time);
-                if (running) {
+
+                if (running){
                     seconds++;
                 }
-                handler.postDelayed(this, 1000);
+                handler.postDelayed(this,1000);
             }
-
         });
     }
-    public void onSaveInstanceState(Bundle savedInstanceState){
-        savedInstanceState.putInt("seconds",seconds);
-        savedInstanceState.putBoolean("running",running);
+
+    public void onCLickVuelta(View view) {
+        final TextView timeVuelta= findViewById(R.id.time_vuelta);
+
+        if (running == false){
+            running = true;
+        }
+        else{
+            if (vuelta < 5){
+                vuelta++;
+                aux = aux + "vuelta:" + vuelta + ":"  + time + "\n";
+                timeVuelta.setText(aux);
+                seconds = 0;
+                if(vuelta==5){
+                    running = false;
+                    seconds = 0;
+                }
+            }else{
+                running = false;
+                seconds = 0;
+                vuelta = 0;
+                time = "";
+                aux = "";
+                timeVuelta.setText("");
+            }
+        }
     }
 }
